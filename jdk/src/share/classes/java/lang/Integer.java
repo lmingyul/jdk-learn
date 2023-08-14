@@ -780,18 +780,21 @@ public final class Integer extends Number implements Comparable<Integer> {
     private static class IntegerCache {
         static final int low = -128;
         static final int high;
-        static final Integer cache[];
-
+        static final Integer cache[]; // 缓存数组对象
+        // 静态代码块——在类加载时执行，需要一定的额外时间来初始化这个缓存数组
         static {
             // high value may be configured by property
+            // 这里 127 是默认值，如果在系统配置中 -XX: AutoBoxCacheMax= ... 有配置缓存最大值就不会使用这个 127
             int h = 127;
             String integerCacheHighPropValue =
-                sun.misc.VM.getSavedProperty("java.lang.Integer.IntegerCache.high");
+                sun.misc.VM.getSavedProperty("java.lang.Integer.IntegerCache.high"); // 从 VM 配置中获取
             if (integerCacheHighPropValue != null) {
                 try {
                     int i = parseInt(integerCacheHighPropValue);
                     i = Math.max(i, 127);
                     // Maximum array size is Integer.MAX_VALUE
+                    // 这里是保证数组长度的最大值不超过 Integer 的最大值，数组中缓存的最大值只能是 Integer.MAX_VALUE - (-low) -1
+                    // -128 -127 ... 0 1 2 ... Integer.MAX_VALUE - (128) -1 —— 这里总长为 Integer.MAX_VALUE
                     h = Math.min(i, Integer.MAX_VALUE - (-low) -1);
                 } catch( NumberFormatException nfe) {
                     // If the property cannot be parsed into an int, ignore it.
@@ -799,12 +802,13 @@ public final class Integer extends Number implements Comparable<Integer> {
             }
             high = h;
 
-            cache = new Integer[(high - low) + 1];
+            cache = new Integer[(high - low) + 1]; // 这里为什么要 + 1，因为需要加上 0 这个数
             int j = low;
-            for(int k = 0; k < cache.length; k++)
+            for(int k = 0; k < cache.length; k++) // 从 -128 ~ high
                 cache[k] = new Integer(j++);
 
             // range [-128, 127] must be interned (JLS7 5.1.7)
+            // 最后还需要断言缓存数组的最大值至少要大于等于127
             assert IntegerCache.high >= 127;
         }
 
@@ -826,7 +830,16 @@ public final class Integer extends Number implements Comparable<Integer> {
      * @return an {@code Integer} instance representing {@code i}.
      * @since  1.5
      */
+    /**
+     * 这个类用于基础数据类型自动装箱时使用，在 JDK 5 的时候引入了缓存数组 IntegerCache.cache
+     * 这个缓存适用于 -128 ~ +127 的整数值
+     * IntegerCache.low —— 为 -128，定义为了静态常量
+     * IntegerCache.high —— 为 127，在静态代码块中进行初始化的
+     */
     public static Integer valueOf(int i) {
+        /**
+         如果自动装箱的值在  -128 ~ +127 范围内，会返回缓存数组的已经新建号的 Integer 的对象
+          */
         if (i >= IntegerCache.low && i <= IntegerCache.high)
             return IntegerCache.cache[i + (-IntegerCache.low)];
         return new Integer(i);
