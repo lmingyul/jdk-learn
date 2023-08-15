@@ -299,7 +299,7 @@ import java.util.Arrays;
      */
     public synchronized StringBuffer append(StringBuffer sb) {
         toStringCache = null;
-        super.append(sb);
+        super.append(sb); // 使用父类的 append() 方法
         return this;
     }
 

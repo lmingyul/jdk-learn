@@ -134,6 +134,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
                 throw new OutOfMemoryError();
             newCapacity = Integer.MAX_VALUE;
         }
+        // 最后还是赋值给了原本的 value，不会产生多余新的中间数组对象(String 就是产生很多中间对象)
         value = Arrays.copyOf(value, newCapacity);
     }
 
@@ -429,9 +430,12 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
         if (sb == null)
             return appendNull();
         int len = sb.length();
+        // 确保数组长度够，不够就进行扩容，扩容的方法是新建数组，新数组长度为原数组长度 * 2 + 2，如果乘 2 + 2 还不够，就以目前拼接完后的总长作为扩容数组的总长
+        // 如果没有指定数组初始长度，就默认是 16
         ensureCapacityInternal(count + len);
         sb.getChars(0, len, value, count);
         count += len;
+        // 这里与 String 对象拼接不同的是，String 对象返回的是 new String() 新的对象，而这边返回的是还是 StringBuffer/StringBuilder(本质还是原本的字符数组 value)
         return this;
     }
 

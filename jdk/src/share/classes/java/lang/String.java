@@ -108,10 +108,16 @@ import java.util.regex.PatternSyntaxException;
  * @since   JDK1.0
  */
 
+/**
+ * final 修饰代表不可变
+ * String 类为什么定义为不可变
+ * 1. 缓存：在 JVM 中存在字符串常量池，可以将字面量相同的字符串缓存在常量池中，节省堆资源
+ * 2. 安全性、线程安全
+ */
 public final class String
     implements java.io.Serializable, Comparable<String>, CharSequence {
     /** The value is used for character storage. */
-    private final char value[];
+    private final char value[]; // String 底层使用的是 char[] 数组进行数据存储的
 
     /** Cache the hash code for the string */
     private int hash; // Default to 0
@@ -177,10 +183,10 @@ public final class String
      * @param  value
      *         Array that is the source of characters
      *
-     * @param  offset
+     * @param  offset 第一个字符的位置
      *         The initial offset
      *
-     * @param  count
+     * @param  count 字符数组的长度
      *         The length
      *
      * @throws  IndexOutOfBoundsException
@@ -198,7 +204,7 @@ public final class String
         if (offset > value.length - count) {
             throw new StringIndexOutOfBoundsException(offset + count);
         }
-        this.value = Arrays.copyOfRange(value, offset, offset+count);
+        this.value = Arrays.copyOfRange(value, offset, offset+count); // 新建一个字符数组，然后使用系统拷贝将旧数组的数据拷贝到一个新的数组中
     }
 
     /**
@@ -2010,15 +2016,18 @@ public final class String
      * @return  a string that represents the concatenation of this object's
      *          characters followed by the string argument's characters.
      */
+    /**
+     * 字符串拼接
+     */
     public String concat(String str) {
         int otherLen = str.length();
         if (otherLen == 0) {
             return this;
         }
         int len = value.length;
-        char buf[] = Arrays.copyOf(value, len + otherLen);
-        str.getChars(buf, len);
-        return new String(buf, true);
+        char buf[] = Arrays.copyOf(value, len + otherLen); // 新建一个字符串数组，长度为 value + str, 然后将 value 数组拷贝到新数组中
+        str.getChars(buf, len); // 将字符串数组 buf 后面拷贝 str 的字符
+        return new String(buf, true); // 新建一个新的 String 对象，保证 String 的不变性， true 在这里没用
     }
 
     /**
